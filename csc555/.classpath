@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry kind="src" path="src"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.7"/>
 	<classpathentry kind="lib" path="/home/eric/bin/hadoop-1.1.2/lib/commons-io-2.1.jar"/>
 	<classpathentry kind="lib" path="/home/eric/bin/hadoop-1.1.2/lib/core-3.1.1.jar"/>
 	<classpathentry kind="lib" path="/home/eric/bin/hadoop-1.1.2/lib/commons-collections-3.2.1.jar"/>
@@ -48,12 +48,18 @@
 	<classpathentry kind="lib" path="/home/eric/bin/hadoop-1.1.2/lib/log4j-1.2.15.jar"/>
 	<classpathentry kind="lib" path="/home/eric/bin/hadoop-1.1.2/lib/commons-httpclient-3.0.1.jar"/>
 	<classpathentry kind="lib" path="/home/eric/bin/hadoop-1.1.2/hadoop-test-1.1.2.jar"/>
-	<classpathentry kind="lib" path="/home/eric/bin/hadoop-1.1.2/hadoop-examples-0.20.205.0.jar"/>
 	<classpathentry kind="lib" path="/home/eric/bin/hadoop-1.1.2/hadoop-minicluster-1.1.2.jar"/>
 	<classpathentry kind="lib" path="/home/eric/bin/hadoop-1.1.2/hadoop-client-1.1.2.jar"/>
 	<classpathentry kind="lib" path="/home/eric/bin/hadoop-1.1.2/hadoop-core-1.1.2.jar"/>
 	<classpathentry kind="lib" path="/home/eric/bin/hadoop-1.1.2/hadoop-ant-1.1.2.jar"/>
 	<classpathentry kind="lib" path="/home/eric/bin/hadoop-1.1.2/hadoop-examples-1.1.2.jar"/>
 	<classpathentry kind="lib" path="/home/eric/bin/hadoop-1.1.2/hadoop-tools-1.1.2.jar"/>
+	<classpathentry kind="lib" path="JSON-java-master.jar">
+		<attributes>
+			<attribute name="org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY" value="csc555/src/org/json"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="RCWordCount.jar"/>
+	<classpathentry kind="lib" path="RCWordCount_Author.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
