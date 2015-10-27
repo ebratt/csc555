@@ -54,12 +54,7 @@
 	<classpathentry kind="lib" path="/home/eric/bin/hadoop-1.1.2/hadoop-ant-1.1.2.jar"/>
 	<classpathentry kind="lib" path="/home/eric/bin/hadoop-1.1.2/hadoop-examples-1.1.2.jar"/>
 	<classpathentry kind="lib" path="/home/eric/bin/hadoop-1.1.2/hadoop-tools-1.1.2.jar"/>
-	<classpathentry kind="lib" path="JSON-java-master.jar">
-		<attributes>
-			<attribute name="org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY" value="csc555/src/org/json"/>
-		</attributes>
-	</classpathentry>
+	<classpathentry kind="lib" path="RCTop10.jar"/>
 	<classpathentry kind="lib" path="RCWordCount.jar"/>
-	<classpathentry kind="lib" path="RCWordCount_Author.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

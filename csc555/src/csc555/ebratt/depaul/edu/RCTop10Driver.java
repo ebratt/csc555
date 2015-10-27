@@ -1,6 +1,7 @@
 package csc555.ebratt.depaul.edu;
 
 import java.io.IOException;
+import java.util.Iterator;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.conf.Configured;
@@ -18,55 +19,52 @@ import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
 import org.apache.hadoop.util.Tool;
 import org.apache.hadoop.util.ToolRunner;
-import org.json.JSONException;
-import org.json.JSONObject;
 
-public class RCWordCountDriver extends Configured implements Tool {
+public class RCTop10Driver extends Configured implements Tool {
 
-	public static class RCWordCountMapper extends
-			Mapper<LongWritable, Text, Text, IntWritable> {
+	public static class RCTop10Mapper extends
+			Mapper<LongWritable, Text, IntWritable, Text> {
+		
+		public RCTop10Mapper(){};
 
-		public RCWordCountMapper() { };
-
-		private static final IntWritable one = new IntWritable(1);
+		private IntWritable count = new IntWritable();
+		private Text text = new Text();
 
 		public void map(LongWritable key, Text value, Context context)
 				throws IOException, InterruptedException {
 
-			String word = context.getConfiguration().get("word");
-			String[] tuple = value.toString().split("\\n");
-			try {
-				for (int i = 0; i < tuple.length; i++) {
-					JSONObject obj = new JSONObject(tuple[i]);
-					context.write(new Text(obj.getString(word)), one);
-				}
-			} catch (JSONException e) {
-				e.printStackTrace();
-			}
+			count.set(Integer.parseInt(value.toString().split("\\t")[1]));
+			text.set(value.toString().split("\\t")[0]);
+
+			context.write(count, text);
 		}
 	}
 
-	public static class RCWordCountReducer extends
-			Reducer<Text, IntWritable, Text, IntWritable> {
+	public static class RCTop10Reducer extends
+			Reducer<IntWritable, Text, IntWritable, Text> {
+		
+		public RCTop10Reducer(){};
 
-		public RCWordCountReducer() { };
-
-		public void reduce(Text key, Iterable<IntWritable> values,
+		public void reduce(IntWritable key, Iterable<Text> values,
 				Context context) throws IOException, InterruptedException {
-			int sum = 0;
-			while (values.iterator().hasNext()) {
-				sum += values.iterator().next().get();
+
+			StringBuffer sb = new StringBuffer();
+			Iterator<Text> itr = values.iterator();
+			sb.append("[");
+			while (itr.hasNext()) {
+				sb.append(itr.next().toString());
+				if (itr.hasNext())
+					sb.append(",");
 			}
-			context.write(key, new IntWritable(sum));
+			sb.append("]");
+
+			context.write(key, new Text(sb.toString()));
 		}
 	}
 
-	@Override
 	public int run(String[] args) throws Exception {
 
-		Job job = new Job(getConf());
-		String word = getConf().get("word");
-		job.setJobName("Reddit Word Count of: " + word);
+		Job job = new Job(getConf(), "Top 10 Reddit");
 
 		Path in = new Path(args[0]);
 		Path out = new Path(args[1]);
@@ -77,23 +75,26 @@ public class RCWordCountDriver extends Configured implements Tool {
 		// job.setNumReduceTasks(0);
 
 		// Mapper and Reducer Classes to use
-		job.setMapperClass(RCWordCountMapper.class);
-		job.setReducerClass(RCWordCountReducer.class);
+		job.setMapperClass(RCTop10Mapper.class);
+		job.setReducerClass(RCTop10Reducer.class);
 
 		// Mapper output classes
-		job.setMapOutputKeyClass(Text.class);
-		job.setMapOutputValueClass(IntWritable.class);
+		job.setMapOutputKeyClass(IntWritable.class);
+		job.setMapOutputValueClass(Text.class);
 
 		// Reducer input class
 		job.setInputFormatClass(TextInputFormat.class);
 
 		// Reducer output classes
-		job.setOutputKeyClass(Text.class);
-		job.setOutputValueClass(IntWritable.class);
+		job.setOutputKeyClass(IntWritable.class);
+		job.setOutputValueClass(Text.class);
 		job.setOutputFormatClass(TextOutputFormat.class);
 
+		// Tell Hadoop to sort in descending order
+		job.setSortComparatorClass(DescendingIntWritableComparable.class);
+
 		// The Jar file to run
-		job.setJarByClass(RCWordCountDriver.class);
+		job.setJarByClass(RCTop10Driver.class);
 
 		boolean success = job.waitForCompletion(true);
 		System.exit(success ? 0 : 1);
@@ -103,8 +104,8 @@ public class RCWordCountDriver extends Configured implements Tool {
 
 	public static void main(String[] args) throws Exception {
 		Configuration conf = new Configuration();
-		if (args.length != 3) {
-			System.err.println("Usage: RCWordCountDriver <in> <out> <word>");
+		if (args.length != 2) {
+			System.err.println("Usage: RCTop10 <in> <out>");
 			System.exit(2);
 		}
 		Path out = new Path(args[1]);
@@ -112,8 +113,7 @@ public class RCWordCountDriver extends Configured implements Tool {
 		if (hdfs.exists(out)) {
 			hdfs.delete(out, true);
 		}
-		conf.set("word", args[2]);
-		int res = ToolRunner.run(conf, new RCWordCountDriver(), args);
+		int res = ToolRunner.run(conf, new RCTop10Driver(), args);
 		System.exit(res);
 	}
 

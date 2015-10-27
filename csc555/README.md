@@ -35,7 +35,7 @@ I am using the data provided in this torrent link:
 
     magnet:?xt=urn:btih:7690f71ea949b868080401c749e878f98de34d3d&dn=reddit%5Fdata&tr=http%3A%2F%2Ftracker.pushshift.io%3A6969%2Fannounce&tr=udp%3A%2F%2Ftracker.openbittorrent.com%3A80
 
-It contains over 1.7 billion reddit comments. I used uTorrent tow download to my local machine and then uploaded these files to an AWS S3 bucket called 'ebratt.depaul.edu'. For example, to download the October, 2007 Reddit Comment data in `.tar.bz2` format:
+It contains over 1.7 billion reddit comments. I used uTorrent tow download to my local machine and then uploaded these files to an AWS S3 bucket called 'ebratt.depaul.edu'. For example, to download the October, 2007 Reddit Comment data in `.bz2` format:
 
     wget https://s3-us-west-2.amazonaws.com/ebratt.depaul.edu/RC_2007-10.bz2
 
@@ -64,4 +64,5 @@ According to the help page of the website:
  - Downloaded and installed HDT on my linux desktop
  - Downloaded, installed, and configured Hadoop 1.1.2 on my linux desktop (1.1 and 2.2 are the only versions of Hadoop that are currently supported with the HDT plugin). 
  - Created a `MergePut` class to merge the 92 Reddit Comment files into a single file on HDFS. With a default 64Mb block-size, that should produce roughly 15,625 blocks.
- - Created an RCWordCount_Author class to count the number of comments by author and output the top 10.
+ - Created an `RCWordCount_Author` class to count the number of comments by author
+ - Created an `RCWordCount_Top10` class to sort some file on HDFS and output the top 10 in descending order
