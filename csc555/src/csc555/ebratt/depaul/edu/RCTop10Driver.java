@@ -24,11 +24,13 @@ public class RCTop10Driver extends Configured implements Tool {
 
 	public static class RCTop10Mapper extends
 			Mapper<LongWritable, Text, IntWritable, Text> {
-		
-		public RCTop10Mapper(){};
 
+		// instance variables to reduce heap size
 		private IntWritable count = new IntWritable();
 		private Text text = new Text();
+		
+		// default constructor
+		public RCTop10Mapper(){};
 
 		public void map(LongWritable key, Text value, Context context)
 				throws IOException, InterruptedException {
@@ -43,13 +45,17 @@ public class RCTop10Driver extends Configured implements Tool {
 	public static class RCTop10Reducer extends
 			Reducer<IntWritable, Text, IntWritable, Text> {
 		
+		// instance variables to reduce heap size
+		private Text text = new Text();
+		
+		// default constructor
 		public RCTop10Reducer(){};
 
 		public void reduce(IntWritable key, Iterable<Text> values,
 				Context context) throws IOException, InterruptedException {
 
-			StringBuffer sb = new StringBuffer();
 			Iterator<Text> itr = values.iterator();
+			StringBuffer sb = new StringBuffer();
 			sb.append("[");
 			while (itr.hasNext()) {
 				sb.append(itr.next().toString());
@@ -57,8 +63,9 @@ public class RCTop10Driver extends Configured implements Tool {
 					sb.append(",");
 			}
 			sb.append("]");
-
-			context.write(key, new Text(sb.toString()));
+			text.set(sb.toString());
+			sb = null;
+			context.write(key, text);
 		}
 	}
 
@@ -82,7 +89,7 @@ public class RCTop10Driver extends Configured implements Tool {
 		job.setMapOutputKeyClass(IntWritable.class);
 		job.setMapOutputValueClass(Text.class);
 
-		// Reducer input class
+		// input class
 		job.setInputFormatClass(TextInputFormat.class);
 
 		// Reducer output classes
@@ -91,7 +98,7 @@ public class RCTop10Driver extends Configured implements Tool {
 		job.setOutputFormatClass(TextOutputFormat.class);
 
 		// Tell Hadoop to sort in descending order
-		job.setSortComparatorClass(DescendingIntWritableComparable.class);
+		job.setSortComparatorClass(DescendingVIntWritableComparable.class);
 
 		// The Jar file to run
 		job.setJarByClass(RCTop10Driver.class);

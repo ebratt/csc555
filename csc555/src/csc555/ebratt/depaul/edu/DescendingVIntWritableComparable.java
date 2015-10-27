@@ -2,12 +2,12 @@ package csc555.ebratt.depaul.edu;
 
 import java.nio.ByteBuffer;
 
-import org.apache.hadoop.io.IntWritable;
+import org.apache.hadoop.io.VIntWritable;
 import org.apache.hadoop.io.WritableComparator;
 
-public class DescendingIntWritableComparable extends WritableComparator {
+public class DescendingVIntWritableComparable extends WritableComparator {
 
-	public DescendingIntWritableComparable() { super(IntWritable.class); }
+	public DescendingVIntWritableComparable() { super(VIntWritable.class); }
 
 	@Override
 	public int compare(byte[] b1, int s1, int l1, byte[] b2, int s2, int l2) {

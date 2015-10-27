@@ -1,6 +1,7 @@
 package csc555.ebratt.depaul.edu;
 
 import java.io.IOException;
+import java.util.StringTokenizer;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.conf.Configured;
@@ -26,7 +27,12 @@ public class RCWordCountDriver extends Configured implements Tool {
 	public static class RCWordCountMapper extends
 			Mapper<LongWritable, Text, Text, IntWritable> {
 
-		public RCWordCountMapper() { };
+		// instance variables for heap size
+		private Text wordText = new Text();
+
+		// Default constructor
+		public RCWordCountMapper() {
+		};
 
 		private static final IntWritable one = new IntWritable(1);
 
@@ -38,7 +44,16 @@ public class RCWordCountDriver extends Configured implements Tool {
 			try {
 				for (int i = 0; i < tuple.length; i++) {
 					JSONObject obj = new JSONObject(tuple[i]);
-					context.write(new Text(obj.getString(word)), one);
+					String jsonString = obj.getString(word);
+					StringTokenizer itr = new StringTokenizer(jsonString);
+					while (itr.hasMoreTokens()) {
+						String tmp = itr.nextToken()
+								.replaceAll("[^\\dA-Za-z ]", "")
+								.replaceAll("\\s+", "+")
+								.toLowerCase();
+						wordText.set(tmp);
+						context.write(wordText, one);
+					}
 				}
 			} catch (JSONException e) {
 				e.printStackTrace();
@@ -49,7 +64,8 @@ public class RCWordCountDriver extends Configured implements Tool {
 	public static class RCWordCountReducer extends
 			Reducer<Text, IntWritable, Text, IntWritable> {
 
-		public RCWordCountReducer() { };
+		public RCWordCountReducer() {
+		};
 
 		public void reduce(Text key, Iterable<IntWritable> values,
 				Context context) throws IOException, InterruptedException {
@@ -66,7 +82,10 @@ public class RCWordCountDriver extends Configured implements Tool {
 
 		Job job = new Job(getConf());
 		String word = getConf().get("word");
-		job.setJobName("Reddit Word Count of: " + word);
+		StringBuffer sb = new StringBuffer();
+		sb.append("Reddit Word Count of: ");
+		sb.append(word);
+		job.setJobName(sb.toString());
 
 		Path in = new Path(args[0]);
 		Path out = new Path(args[1]);
