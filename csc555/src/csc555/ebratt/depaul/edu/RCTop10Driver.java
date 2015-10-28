@@ -96,6 +96,9 @@ public class RCTop10Driver extends Configured implements Tool {
 		job.setOutputKeyClass(IntWritable.class);
 		job.setOutputValueClass(Text.class);
 		job.setOutputFormatClass(TextOutputFormat.class);
+		
+		// Force # of reduce tasks to 1
+		job.setNumReduceTasks(1);
 
 		// Tell Hadoop to sort in descending order
 		job.setSortComparatorClass(DescendingVIntWritableComparable.class);
