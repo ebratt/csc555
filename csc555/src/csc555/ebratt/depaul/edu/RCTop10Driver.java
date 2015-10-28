@@ -123,6 +123,11 @@ public class RCTop10Driver extends Configured implements Tool {
 		if (hdfs.exists(out)) {
 			hdfs.delete(out, true);
 		}
+		
+		// Enable mapper output compression, but not reducer
+		conf.set("mapreduce.map.output.compress", "true");
+		conf.set("mapreduce.output.fileoutputformat.compress", "false");
+		
 		int res = ToolRunner.run(conf, new RCTop10Driver(), args);
 		System.exit(res);
 	}

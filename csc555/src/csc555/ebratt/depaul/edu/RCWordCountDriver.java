@@ -102,7 +102,7 @@ public class RCWordCountDriver extends Configured implements Tool {
 		// Mapper output classes
 		job.setMapOutputKeyClass(Text.class);
 		job.setMapOutputValueClass(IntWritable.class);
-
+		
 		// Reducer input class
 		job.setInputFormatClass(TextInputFormat.class);
 
@@ -132,6 +132,11 @@ public class RCWordCountDriver extends Configured implements Tool {
 			hdfs.delete(out, true);
 		}
 		conf.set("word", args[2]);
+		
+		// Enable mapper output compression, but not reducer
+		conf.set("mapreduce.map.output.compress", "true");
+		conf.set("mapreduce.output.fileoutputformat.compress", "false");
+		
 		int res = ToolRunner.run(conf, new RCWordCountDriver(), args);
 		System.exit(res);
 	}

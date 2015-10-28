@@ -1,3 +1,0 @@
-Manifest-Version: 1.0
-Main-Class: csc555.ebratt.depaul.edu.RCTop10Driver
-
