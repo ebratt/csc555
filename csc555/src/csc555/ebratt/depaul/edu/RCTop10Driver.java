@@ -50,22 +50,18 @@ public class RCTop10Driver extends Configured implements Tool {
 		
 		// default constructor
 		public RCTop10Reducer(){};
-
+		
+		// This caused a java heap error, so instead of concatenating
+		// every word together of the same count, I'm just going to
+		// emit the count and the word
 		public void reduce(IntWritable key, Iterable<Text> values,
 				Context context) throws IOException, InterruptedException {
 
 			Iterator<Text> itr = values.iterator();
-			StringBuffer sb = new StringBuffer();
-			sb.append("[");
 			while (itr.hasNext()) {
-				sb.append(itr.next().toString());
-				if (itr.hasNext())
-					sb.append(",");
+				text = itr.next();
+				context.write(key, text); 
 			}
-			sb.append("]");
-			text.set(sb.toString());
-			sb = null;
-			context.write(key, text);
 		}
 	}
 
