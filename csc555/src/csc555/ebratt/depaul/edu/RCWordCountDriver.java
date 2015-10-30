@@ -110,6 +110,11 @@ public class RCWordCountDriver extends Configured implements Tool {
 		job.setOutputKeyClass(Text.class);
 		job.setOutputValueClass(IntWritable.class);
 		job.setOutputFormatClass(TextOutputFormat.class);
+		
+		// Combiner
+		if (args[3].equals("yes")) {
+			job.setCombinerClass(RCWordCountReducer.class);
+		}
 
 		// The Jar file to run
 		job.setJarByClass(RCWordCountDriver.class);
@@ -122,8 +127,9 @@ public class RCWordCountDriver extends Configured implements Tool {
 
 	public static void main(String[] args) throws Exception {
 		Configuration conf = new Configuration();
-		if (args.length != 3) {
-			System.err.println("Usage: RCWordCountDriver <in> <out> <word>");
+		if (args.length != 4) {
+			System.err.println(
+			"Usage: RCWordCountDriver <in> <out> <word> <combiner? yes/no>");
 			System.exit(2);
 		}
 		Path out = new Path(args[1]);
