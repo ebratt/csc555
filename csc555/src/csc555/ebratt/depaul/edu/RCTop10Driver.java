@@ -110,7 +110,7 @@ public class RCTop10Driver extends Configured implements Tool {
 	public static void main(String[] args) throws Exception {
 		Configuration conf = new Configuration();
 		if (args.length != 2) {
-			System.err.println("Usage: RCTop10 <in> <out>");
+			System.err.println("Usage: RCTop10.jar <in> <out>");
 			System.exit(2);
 		}
 		Path out = new Path(args[1]);

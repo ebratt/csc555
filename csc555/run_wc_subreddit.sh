@@ -1,4 +1,4 @@
-time hadoop jar RCWordCount.jar /user/ec2-user/input/combined /user/ec2-user/output/wordcount_subreddit subreddit no
+time hadoop jar RCWordCount.jar /user/ec2-user/input/combined /user/ec2-user/output/wordcount_subreddit subreddit no "*"
 
 time hadoop jar RCTop10.jar /user/ec2-user/output/wordcount_subreddit /user/ec2-user/output/wordcount_subreddit_top10
 

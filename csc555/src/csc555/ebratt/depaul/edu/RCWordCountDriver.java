@@ -24,11 +24,10 @@ import org.json.JSONObject;
 
 public class RCWordCountDriver extends Configured implements Tool {
 
-	public static class RCWordCountMapper extends
-			Mapper<LongWritable, Text, Text, IntWritable> {
+	public static class RCWordCountMapper extends Mapper<LongWritable, Text, Text, IntWritable> {
 
 		// instance variables for heap size
-		private Text wordText = new Text();
+		private Text outputText = new Text();
 
 		// Default constructor
 		public RCWordCountMapper() {
@@ -36,23 +35,25 @@ public class RCWordCountDriver extends Configured implements Tool {
 
 		private static final IntWritable one = new IntWritable(1);
 
-		public void map(LongWritable key, Text value, Context context)
-				throws IOException, InterruptedException {
+		public void map(LongWritable key, Text value, Context context) throws IOException, InterruptedException {
 
-			String word = context.getConfiguration().get("word");
+			String aggregate = context.getConfiguration().get("aggregate");
+			String groupBy = context.getConfiguration().get("groupBy");
 			String[] tuple = value.toString().split("\\n");
 			try {
 				for (int i = 0; i < tuple.length; i++) {
 					JSONObject obj = new JSONObject(tuple[i]);
-					String jsonString = obj.getString(word);
-					StringTokenizer itr = new StringTokenizer(jsonString);
+					StringTokenizer itr = new StringTokenizer(obj.getString(aggregate));
 					while (itr.hasMoreTokens()) {
-						String tmp = itr.nextToken()
+						String tmpAggregate = itr.nextToken()
 								.replaceAll("[^\\dA-Za-z ]", "")
 								.replaceAll("\\s+", "+")
 								.toLowerCase();
-						wordText.set(tmp);
-						context.write(wordText, one);
+						if (groupBy.equals("*"))
+							outputText.set(tmpAggregate);
+						else
+							outputText.set(obj.getString(groupBy) + "_" + tmpAggregate);
+						context.write(outputText, one);
 					}
 				}
 			} catch (JSONException e) {
@@ -61,14 +62,13 @@ public class RCWordCountDriver extends Configured implements Tool {
 		}
 	}
 
-	public static class RCWordCountReducer extends
-			Reducer<Text, IntWritable, Text, IntWritable> {
+	public static class RCWordCountReducer extends Reducer<Text, IntWritable, Text, IntWritable> {
 
 		public RCWordCountReducer() {
 		};
 
-		public void reduce(Text key, Iterable<IntWritable> values,
-				Context context) throws IOException, InterruptedException {
+		public void reduce(Text key, Iterable<IntWritable> values, Context context)
+				throws IOException, InterruptedException {
 			int sum = 0;
 			while (values.iterator().hasNext()) {
 				sum += values.iterator().next().get();
@@ -81,10 +81,13 @@ public class RCWordCountDriver extends Configured implements Tool {
 	public int run(String[] args) throws Exception {
 
 		Job job = new Job(getConf());
-		String word = getConf().get("word");
+		String aggregate = getConf().get("aggregate");
+		String groupBy = getConf().get("groupBy");
 		StringBuffer sb = new StringBuffer();
-		sb.append("Reddit Word Count of: ");
-		sb.append(word);
+		sb.append("count of: ");
+		sb.append(aggregate);
+		sb.append("; grouped by: ");
+		sb.append(groupBy);
 		job.setJobName(sb.toString());
 
 		Path in = new Path(args[0]);
@@ -102,7 +105,7 @@ public class RCWordCountDriver extends Configured implements Tool {
 		// Mapper output classes
 		job.setMapOutputKeyClass(Text.class);
 		job.setMapOutputValueClass(IntWritable.class);
-		
+
 		// Reducer input class
 		job.setInputFormatClass(TextInputFormat.class);
 
@@ -110,7 +113,7 @@ public class RCWordCountDriver extends Configured implements Tool {
 		job.setOutputKeyClass(Text.class);
 		job.setOutputValueClass(IntWritable.class);
 		job.setOutputFormatClass(TextOutputFormat.class);
-		
+
 		// Combiner
 		if (args[3].equals("yes")) {
 			job.setCombinerClass(RCWordCountReducer.class);
@@ -127,9 +130,9 @@ public class RCWordCountDriver extends Configured implements Tool {
 
 	public static void main(String[] args) throws Exception {
 		Configuration conf = new Configuration();
-		if (args.length != 4) {
+		if (args.length != 5) {
 			System.err.println(
-			"Usage: RCWordCountDriver <in> <out> <word> <combiner? yes/no>");
+					"Usage: RCWordCount.jar <in> <out> <aggregate> <combiner? yes/no> <group by '*' for all>");
 			System.exit(2);
 		}
 		Path out = new Path(args[1]);
@@ -137,12 +140,13 @@ public class RCWordCountDriver extends Configured implements Tool {
 		if (hdfs.exists(out)) {
 			hdfs.delete(out, true);
 		}
-		conf.set("word", args[2]);
-		
+		conf.set("aggregate", args[2]);
+		conf.set("groupBy", args[4]);
+
 		// Enable mapper output compression, but not reducer
 		conf.set("mapreduce.map.output.compress", "true");
 		conf.set("mapreduce.output.fileoutputformat.compress", "false");
-		
+
 		int res = ToolRunner.run(conf, new RCWordCountDriver(), args);
 		System.exit(res);
 	}

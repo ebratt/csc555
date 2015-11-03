@@ -1,4 +1,4 @@
-time hadoop jar RCWordCount.jar /user/ec2-user/input/combined /user/ec2-user/output/wordcount_author author no
+time hadoop jar RCWordCount.jar /user/ec2-user/input/combined /user/ec2-user/output/wordcount_author author no "*"
 
 time hadoop jar RCTop10.jar /user/ec2-user/output/wordcount_author /user/ec2-user/output/wordcount_author_top10
 
