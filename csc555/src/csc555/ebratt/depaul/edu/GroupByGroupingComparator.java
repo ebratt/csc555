@@ -4,6 +4,7 @@ import org.apache.hadoop.io.WritableComparable;
 import org.apache.hadoop.io.WritableComparator;
 
 public class GroupByGroupingComparator extends WritableComparator {
+	
     public GroupByGroupingComparator() {
         super(GroupByCountPair.class, true);
     }
