@@ -50,7 +50,7 @@ public class RCWordCountDriver extends Configured implements Tool {
 								.replaceAll("\\s+", "+")
 								.toLowerCase();
 						if (groupBy.equals("*"))
-							outputText.set(tmpAggregate);
+							outputText.set("ALL" + "_" + tmpAggregate);
 						else
 							outputText.set(obj.getString(groupBy) + "_" + tmpAggregate);
 						context.write(outputText, one);
