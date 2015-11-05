@@ -9,7 +9,7 @@ public class GroupByCountPairPartitioner extends Partitioner<GroupByCountPair, T
 
 	@Override
 	public int getPartition(GroupByCountPair groupByCountPair, Text text, int numPartitions) {
-		return groupByCountPair.getGroupBy().hashCode() % numPartitions;
+		return Math.abs(groupByCountPair.getGroupBy().hashCode()) % numPartitions;
 	}
 
 }
