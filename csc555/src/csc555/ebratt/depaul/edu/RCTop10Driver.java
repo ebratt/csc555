@@ -37,13 +37,22 @@ public class RCTop10Driver extends Configured implements Tool {
 			
 			// parse the input
 			String line = value.toString();
-			String aggregate = line.split("\\t")[0].split("_")[1];
-			String groupBy = line.split("\\t")[0].split("_")[0];
-			long count = Long.parseLong(line.split("\\t")[1]);
-			if (!(groupBy.equals(null))) {
-				groupByCountPair.setGroupBy(groupBy);
-				groupByCountPair.setCount(count);
-				context.write(groupByCountPair, new Text(aggregate));
+			try {
+				String aggregate = line.split("\\t")[0].split("_")[1];
+				String groupBy = line.split("\\t")[0].split("_")[0];
+				String countString = line.split("\\t")[1];
+				if (!(groupBy.equals(null)) && 
+						!(aggregate.equals(null)) && 
+						!(countString.equals(null))) {
+					long count = Long.parseLong(countString);
+					groupByCountPair.setGroupBy(groupBy);
+					groupByCountPair.setCount(count);
+					context.write(groupByCountPair, new Text(aggregate));
+				}
+				
+			} catch (ArrayIndexOutOfBoundsException e) {
+				e.printStackTrace();
+				// what do we do if we get this?
 			}
 		}
 	}
