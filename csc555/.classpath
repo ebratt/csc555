@@ -4,24 +4,7 @@
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.7"/>
 	<classpathentry kind="lib" path="RCTop10.jar"/>
 	<classpathentry kind="lib" path="RCWordCount.jar"/>
-	<classpathentry kind="lib" path="/Users/eric/hadoop/hadoop-1.1.2/hadoop-ant-1.1.2.jar"/>
-	<classpathentry kind="lib" path="/Users/eric/hadoop/hadoop-1.1.2/hadoop-client-1.1.2.jar"/>
-	<classpathentry kind="lib" path="/Users/eric/hadoop/hadoop-1.1.2/hadoop-core-1.1.2.jar" sourcepath="/Users/eric/hadoop/hadoop-1.1.2/lib/commons-io-2.1.jar"/>
-	<classpathentry kind="lib" path="/Users/eric/hadoop/hadoop-1.1.2/hadoop-examples-1.1.2.jar"/>
-	<classpathentry kind="lib" path="/Users/eric/hadoop/hadoop-1.1.2/hadoop-minicluster-1.1.2.jar"/>
-	<classpathentry kind="lib" path="/Users/eric/hadoop/hadoop-1.1.2/hadoop-test-1.1.2.jar"/>
-	<classpathentry kind="lib" path="/Users/eric/hadoop/hadoop-1.1.2/hadoop-tools-1.1.2.jar"/>
-	<classpathentry kind="lib" path="/Users/eric/hadoop/hadoop-1.1.2/lib/commons-cli-1.2.jar"/>
-	<classpathentry kind="lib" path="/Users/eric/hadoop/hadoop-1.1.2/lib/commons-codec-1.4.jar"/>
-	<classpathentry kind="lib" path="/Users/eric/hadoop/hadoop-1.1.2/lib/commons-configuration-1.6.jar"/>
-	<classpathentry kind="lib" path="/Users/eric/hadoop/hadoop-1.1.2/lib/commons-io-2.1.jar"/>
-	<classpathentry kind="lib" path="/Users/eric/hadoop/hadoop-1.1.2/lib/commons-lang-2.4.jar"/>
-	<classpathentry kind="lib" path="/Users/eric/hadoop/hadoop-1.1.2/lib/commons-logging-1.1.1.jar"/>
-	<classpathentry kind="lib" path="/Users/eric/hadoop/hadoop-1.1.2/lib/commons-logging-api-1.0.4.jar"/>
-	<classpathentry kind="lib" path="/Users/eric/hadoop/hadoop-1.1.2/lib/core-3.1.1.jar"/>
-	<classpathentry kind="lib" path="/Users/eric/hadoop/hadoop-1.1.2/lib/jackson-core-asl-1.8.8.jar"/>
-	<classpathentry kind="lib" path="/Users/eric/hadoop/hadoop-1.1.2/lib/jackson-mapper-asl-1.8.8.jar"/>
-	<classpathentry kind="lib" path="/Users/eric/hadoop/hadoop-1.1.2/lib/junit-4.5.jar"/>
-	<classpathentry kind="lib" path="/Users/eric/hadoop/hadoop-1.1.2/lib/log4j-1.2.15.jar"/>
+	<classpathentry kind="lib" path="/home/eric/bin/hadoop-1.1.2/lib/log4j-1.2.15.jar"/>
+	<classpathentry kind="lib" path="/home/eric/bin/hadoop-1.1.2/hadoop-core-1.1.2.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
