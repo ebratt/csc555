@@ -54,7 +54,7 @@ import org.apache.log4j.Logger;
  * 
  */
 public class RCTop10Driver extends Configured implements Tool {
-	
+
 	public static Logger log = Logger.getLogger(RCTop10Driver.class);
 
 	/**
@@ -65,8 +65,7 @@ public class RCTop10Driver extends Configured implements Tool {
 	 * @since 11/11/2015
 	 * 
 	 */
-	public static class RCTop10Mapper extends
-			Mapper<Text, Text, GroupByCountPair, Text> {
+	public static class RCTop10Mapper extends Mapper<Text, Text, GroupByCountPair, Text> {
 
 		// instance variable for heap size reduction and sorting
 		private GroupByCountPair groupByCountPair = new GroupByCountPair();
@@ -107,25 +106,23 @@ public class RCTop10Driver extends Configured implements Tool {
 		 * @throws InterruptedException
 		 *             if something calls interrupt() on the thread.
 		 */
-		public void map(Text key, Text value, Context context)
-				throws IOException, InterruptedException {
+		public void map(Text key, Text value, Context context) throws IOException, InterruptedException {
 
-			// parse the input
-			// get the value to count
-			aggregate.set(key.toString().split("_")[1]);
-			// get the value to group by
-			groupBy = key.toString().split("_")[0];
-			// get the value to sum
-			countString = value.toString();
-			// skip blanks
 			try {
-				if (!(groupBy.equals(null)) && !(aggregate.equals(null))
-						&& !(countString.equals(null))) {
+				// parse the input
+				// get the value to count
+				aggregate.set(key.toString().split("_")[1]);
+				// get the value to group by
+				groupBy = key.toString().split("_")[0];
+				// get the value to sum
+				countString = value.toString();
+				// skip blanks
+				if (!(groupBy.equals(null)) && !(aggregate.equals(null)) && !(countString.equals(null))) {
 					long count = Long.parseLong(countString);
 					groupByCountPair.setGroupBy(groupBy);
 					groupByCountPair.setCount(count);
 					context.write(groupByCountPair, aggregate);
-				}	
+				}
 			} catch (ArrayIndexOutOfBoundsException e) {
 				log.info("key: " + key.toString() + "; value: " + value.toString());
 			}
@@ -141,8 +138,7 @@ public class RCTop10Driver extends Configured implements Tool {
 	 * @since 11/11/2015
 	 * 
 	 */
-	public static class RCTop10Reducer extends
-			Reducer<GroupByCountPair, Text, GroupByCountPair, Text> {
+	public static class RCTop10Reducer extends Reducer<GroupByCountPair, Text, GroupByCountPair, Text> {
 
 		// instance variables to reduce heap size
 		private Text text = new Text();
@@ -168,8 +164,8 @@ public class RCTop10Driver extends Configured implements Tool {
 		 * @throws InterruptedException
 		 *             if something calls interrupt() on the thread.
 		 */
-		public void reduce(GroupByCountPair key, Iterable<Text> values,
-				Context context) throws IOException, InterruptedException {
+		public void reduce(GroupByCountPair key, Iterable<Text> values, Context context)
+				throws IOException, InterruptedException {
 
 			// local variable to increment the key count so that we only
 			// emit the top 10 entries
