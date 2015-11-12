@@ -147,14 +147,16 @@ public class RCWordCountDriver extends Configured implements Tool {
 						String tmpAggregate = itr.nextToken()
 								.replaceAll("[^\\dA-Za-z ]", "")
 								.replaceAll("\\s+", "+").toLowerCase();
-						// if user wants to group by all
-						if (groupBy.equals("*"))
-							outputText.set("ALL" + "_" + tmpAggregate);
-						// otherwise group by the groupBy text
-						else
-							outputText.set(obj.getString(groupBy) + "_"
-									+ tmpAggregate);
-						context.write(outputText, one);
+						if (!(tmpAggregate.equals(""))) {
+							// if user wants to group by all
+							if (groupBy.equals("*"))
+								outputText.set("ALL" + "_" + tmpAggregate);
+							// otherwise group by the groupBy text
+							else
+								outputText.set(obj.getString(groupBy) + "_"
+										+ tmpAggregate);
+							context.write(outputText, one);							
+						}
 					}
 				}
 			} catch (JSONException e) { // capture JSONException
