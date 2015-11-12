@@ -40,7 +40,7 @@ import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
 import org.apache.hadoop.util.Tool;
 import org.apache.hadoop.util.ToolRunner;
-//import org.apache.log4j.Logger;
+import org.apache.log4j.Logger;
 
 /**
  * RCTop10Driver is the hadoop class that drives the program. It is intended as
@@ -55,7 +55,7 @@ import org.apache.hadoop.util.ToolRunner;
  */
 public class RCTop10Driver extends Configured implements Tool {
 	
-//	public static Logger log = Logger.getLogger(RCTop10Driver.class);
+	public static Logger log = Logger.getLogger(RCTop10Driver.class);
 
 	/**
 	 * RCTop10Mapper is the hadoop class that maps the input.
@@ -75,8 +75,7 @@ public class RCTop10Driver extends Configured implements Tool {
 		private String countString = new String();
 
 		// default constructor for inner-class
-		public RCTop10Mapper() { 
-//			log.info("Hello from inside RCTop10Mapper's default constructor!");
+		public RCTop10Mapper() {
 		};
 
 		/**
@@ -119,12 +118,16 @@ public class RCTop10Driver extends Configured implements Tool {
 			// get the value to sum
 			countString = value.toString();
 			// skip blanks
-			if (!(groupBy.equals(null)) && !(aggregate.equals(null))
-					&& !(countString.equals(null))) {
-				long count = Long.parseLong(countString);
-				groupByCountPair.setGroupBy(groupBy);
-				groupByCountPair.setCount(count);
-				context.write(groupByCountPair, aggregate);
+			try {
+				if (!(groupBy.equals(null)) && !(aggregate.equals(null))
+						&& !(countString.equals(null))) {
+					long count = Long.parseLong(countString);
+					groupByCountPair.setGroupBy(groupBy);
+					groupByCountPair.setCount(count);
+					context.write(groupByCountPair, aggregate);
+				}	
+			} catch (ArrayIndexOutOfBoundsException e) {
+				log.info("key: " + key.toString() + "; value: " + value.toString());
 			}
 		}
 	}
