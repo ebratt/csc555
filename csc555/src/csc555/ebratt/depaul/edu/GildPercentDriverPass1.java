@@ -136,7 +136,9 @@ public class GildPercentDriverPass1 extends Configured implements Tool {
 					// attempt to parse the line into a JSONObject
 					JSONObject obj = new JSONObject(t);
 					// get the gilded flag (0 or 1)
-					numGilded.set((double)obj.getInt("gilded"));
+					int gildedFlag = 0;
+					if ((double)obj.getInt("gilded") > 0.0) gildedFlag = 1;
+					numGilded.set(gildedFlag);
 					// if user wants to group by all
 					if (groupBy.equals("*"))
 						outKey.set("ALL");

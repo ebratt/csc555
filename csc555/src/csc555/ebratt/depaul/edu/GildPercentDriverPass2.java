@@ -43,6 +43,7 @@ import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
 import org.apache.hadoop.util.Tool;
 import org.apache.hadoop.util.ToolRunner;
+
 //import org.apache.log4j.Logger;
 
 /**
@@ -131,8 +132,8 @@ public class GildPercentDriverPass2 extends Configured implements Tool {
 
 	/**
 	 * GildPercentReducerPass2 is the hadoop class that reduces the output of
-	 * the GildPercentMapperPass2. It will emit the gild percent along with
-	 * the group and will only keep the top 10.
+	 * the GildPercentMapperPass2. It will emit the gild percent along with the
+	 * group.
 	 * 
 	 * @author Eric Bratt
 	 * @version 11/11/2015
@@ -151,7 +152,8 @@ public class GildPercentDriverPass2 extends Configured implements Tool {
 		 * Just emits the top 10 since they're already sorted
 		 * 
 		 * @param key
-		 *            the key from the mapper {@link org.apache.hadoop.io.DoubleWritable}
+		 *            the key from the mapper
+		 *            {@link org.apache.hadoop.io.DoubleWritable}
 		 * @param values
 		 *            a list of {@link org.apache.hadoop.io.Text}
 		 * @param context
@@ -166,11 +168,9 @@ public class GildPercentDriverPass2 extends Configured implements Tool {
 		 */
 		public void reduce(DoubleWritable key, Iterable<Text> values,
 				Context context) throws IOException, InterruptedException {
-			int count = 0;
 			Iterator<Text> itr = values.iterator();
-			while (itr.hasNext() & count < 10) {
+			while (itr.hasNext()) {
 				context.write(key, itr.next());
-				count++;
 			}
 		}
 	}
@@ -231,7 +231,7 @@ public class GildPercentDriverPass2 extends Configured implements Tool {
 		if (args[2].equals("yes")) {
 			job.setCombinerClass(GildPercentReducerPass2.class);
 		}
-		
+
 		// sort in descending order
 		job.setSortComparatorClass(DoubleWritableDescendingComparator.class);
 
