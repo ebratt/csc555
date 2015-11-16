@@ -1,0 +1,277 @@
+package csc555.ebratt.depaul.edu;
+
+/*
+ Copyright (c) 2015 Eric Bratt
+
+ Permission is hereby granted, free of charge, to any person obtaining a copy
+ of this software and associated documentation files (the "Software"), to deal
+ in the Software without restriction, including without limitation the rights
+ to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ copies of the Software, and to permit persons to whom the Software is
+ furnished to do so, subject to the following conditions:
+
+ The above copyright notice and this permission notice shall be included in all
+ copies or substantial portions of the Software.
+
+ The Software shall be used for Good, not Evil.
+
+ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ SOFTWARE.
+ */
+
+import java.io.IOException;
+import java.util.Iterator;
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.conf.Configured;
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.io.LongWritable;
+import org.apache.hadoop.io.Text;
+import org.apache.hadoop.mapreduce.Job;
+import org.apache.hadoop.mapreduce.Mapper;
+import org.apache.hadoop.mapreduce.Reducer;
+import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
+import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
+import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
+import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
+import org.apache.hadoop.util.Tool;
+import org.apache.hadoop.util.ToolRunner;
+
+/**
+ * VoteSorterDriver is the hadoop class that drives the program. It counts and
+ * sorts (descending) the number of votes by author, subreddit, all, etc.
+ * 
+ * @author Eric Bratt
+ * @version 11/11/2015
+ * @since 11/11/2015
+ * 
+ */
+public class VoteSorterDriver extends Configured implements Tool {
+
+	/**
+	 * VoteSorterMapper is the hadoop class that maps the input.
+	 * 
+	 * @author Eric Bratt
+	 * @version 11/11/2015
+	 * @since 11/11/2015
+	 * 
+	 */
+	public static class VoteSorterMapper extends
+			Mapper<LongWritable, Text, LongWritable, Text> {
+
+		// instance variables for heap size reduction
+		private LongWritable outKey = new LongWritable();
+		private Text outValue = new Text();
+
+		// Default constructor for inner-class
+		public VoteSorterMapper() {
+		};
+
+		/**
+		 * Parses the input values and emits the percentage followed by the key
+		 * 
+		 * <p>
+		 * <b>Preconditions:</b>
+		 * <ul>
+		 * <li>the input values must be separated by new line character
+		 * <li>the input value k,v must be delimited by tab character
+		 * </ul>
+		 * 
+		 * <p>
+		 * <b>Postconditions:</b>
+		 * <ul>
+		 * <li>emits (by example) "3500 reddit.com"
+		 * </ul>
+		 * 
+		 * @param key
+		 *            the byte offset as
+		 *            {@link org.apache.hadoop.io.LongWritable}
+		 * @param value
+		 *            the input as {@link org.apache.hadoop.io.Text}
+		 * @param context
+		 *            the {@link org.apache.hadoop.mapreduce.Mapper.Context}
+		 * @throws IOException
+		 *             if there is an issue with input/output (like network
+		 *             connection was lost during processing, ran out of space
+		 *             trying to write, etc.)
+		 * @throws InterruptedException
+		 *             if something calls interrupt() on the thread.
+		 * 
+		 */
+		public void map(LongWritable key, Text value, Context context)
+				throws IOException, InterruptedException,
+				ArrayIndexOutOfBoundsException {
+
+			// a line in the input
+			String[] line = value.toString().split("\\n");
+
+			// loop over the lines
+			for (String t : line) {
+				// attempt to parse the percent gilded
+				long votes = Long.valueOf(t.split("\\t")[1]);
+				String groupBy = t.split("\\t")[0];
+				outKey.set(votes);
+				outValue.set(groupBy);
+				context.write(outKey, outValue);
+			}
+
+		}
+	}
+
+	/**
+	 * VoteSorterReducer is the hadoop class that reduces the output of the
+	 * VoteSorterMapper. It will emit the gild count along with the group.
+	 * 
+	 * @author Eric Bratt
+	 * @version 11/11/2015
+	 * @since 11/11/2015
+	 * 
+	 */
+	public static class VoteSorterReducer extends
+			Reducer<LongWritable, Text, LongWritable, Text> {
+
+		// Default constructor for inner-class
+		public VoteSorterReducer() {
+		};
+
+		/**
+		 * 
+		 * Just emits the top 10 since they're already sorted
+		 * 
+		 * @param key
+		 *            the key from the mapper
+		 *            {@link org.apache.hadoop.io.LongWritable}
+		 * @param values
+		 *            a list of {@link org.apache.hadoop.io.Text}
+		 * @param context
+		 *            the {@link org.apache.hadoop.mapreduce.Mapper.Context}
+		 * @throws IOException
+		 *             if there is an issue with input/output (like network
+		 *             connection was lost during processing, ran out of space
+		 *             trying to write, etc.)
+		 * @throws InterruptedException
+		 *             if something calls interrupt() on the thread.
+		 * 
+		 */
+		public void reduce(LongWritable key, Iterable<Text> values,
+				Context context) throws IOException, InterruptedException {
+			Iterator<Text> itr = values.iterator();
+			while (itr.hasNext()) {
+				context.write(key, itr.next());
+			}
+		}
+	}
+
+	/**
+	 * 
+	 * Runs the driver by creating a new hadoop Job based on the configuration.
+	 * Defines the path in/out based on the first two arguments. Allows for an
+	 * optional combiner based on the 4th argument.
+	 * 
+	 * @param args
+	 *            [0] the input directory on HDFS
+	 * @param args
+	 *            [1] the output directory on HDFS
+	 * @param args
+	 *            [2] tells the system whether or not to use a combiner ("yes")
+	 *            and, if so, it will use the VoteSorterReducer.class as the
+	 *            combiner.
+	 * @throws Exception
+	 *             if there is an issue with any of the arguments
+	 * 
+	 */
+	@Override
+	public int run(String[] args) throws Exception {
+
+		Job job = new Job(getConf());
+		StringBuffer sb = new StringBuffer();
+		sb.append("sorted vote counts");
+		job.setJobName(sb.toString());
+
+		Path in = new Path(args[0]);
+		Path out = new Path(args[1]);
+		FileInputFormat.setInputPaths(job, in);
+		FileOutputFormat.setOutputPath(job, out);
+
+		// to ensure output is sorted
+		job.setNumReduceTasks(1);
+
+		// Mapper and Reducer Classes to use
+		job.setMapperClass(VoteSorterMapper.class);
+		job.setReducerClass(VoteSorterReducer.class);
+
+		// Mapper output classes
+		job.setMapOutputKeyClass(LongWritable.class);
+		job.setMapOutputValueClass(Text.class);
+
+		// Input format class
+		job.setInputFormatClass(TextInputFormat.class);
+
+		// Reducer output classes
+		job.setOutputKeyClass(LongWritable.class);
+		job.setOutputValueClass(Text.class);
+
+		// Output format class
+		job.setOutputFormatClass(TextOutputFormat.class);
+
+		// Combiner
+		if (args[2].equals("yes")) {
+			job.setCombinerClass(VoteSorterReducer.class);
+		}
+
+		// sort in descending order
+		job.setSortComparatorClass(LongWritable.DecreasingComparator.class);
+
+		// The Jar file to run
+		job.setJarByClass(VoteSorterDriver.class);
+
+		boolean success = job.waitForCompletion(true);
+		System.exit(success ? 0 : 1);
+
+		return 0;
+	};
+
+	/**
+	 * 
+	 * This is the entry point to the program. It creates a new Configuration,
+	 * checks the arguments, deletes the output directory on HDFS (if it already
+	 * exists), sets the configuration properties 'aggregate' and 'groupBy',
+	 * tells hadoop that it wants to compress the mapper output but not the
+	 * reducer output, and runs the job.
+	 * 
+	 * @param args
+	 *            [0] the input directory on HDFS
+	 * @param args
+	 *            [1] the output directory on HDFS
+	 * @param args
+	 *            [2] the combiner flag
+	 * @throws Exception
+	 *             if there is an issue with any of the arguments
+	 * 
+	 */
+	public static void main(String[] args) throws Exception {
+		Configuration conf = new Configuration();
+		if (args.length != 3) {
+			System.err
+					.println("Usage: VoteSorter.jar <in> <out> <combiner? yes/no>");
+			System.exit(2);
+		}
+		Path out = new Path(args[1]);
+		FileSystem hdfs = FileSystem.get(conf);
+		if (hdfs.exists(out)) {
+			hdfs.delete(out, true);
+		}
+
+		// Enable mapper output compression, but not reducer
+		conf.set("mapreduce.map.output.compress", "true");
+		conf.set("mapreduce.output.fileoutputformat.compress", "false");
+
+		int res = ToolRunner.run(conf, new VoteSorterDriver(), args);
+		System.exit(res);
+	}
+}
