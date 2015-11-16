@@ -138,7 +138,7 @@ public class AverageScoreRankerDriver extends Configured implements Tool {
 	 * @since 11/11/2015
 	 * 
 	 */
-	public static class AverageScoreRankerReducer extends Reducer<Text, DoubleWritable, DoubleWritable, Text> {
+	public static class AverageScoreRankerReducer extends Reducer<DoubleWritable, Text, DoubleWritable, Text> {
 
 		// Default constructor for inner-class
 		public AverageScoreRankerReducer() {
