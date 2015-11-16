@@ -47,8 +47,8 @@ import org.json.JSONObject;
 
 /**
  * AverageScoreDriver is the hadoop class that drives the program. It parses the
- * reddit comments to determine the the score per comment by group. This is part of a
- * two-pass approach to finally calculate the average score by group.
+ * reddit comments to determine the the score per comment by group. This is part
+ * of a two-pass approach to finally calculate the average score by group.
  * 
  * @author Eric Bratt
  * @version 11/11/2015
@@ -65,8 +65,7 @@ public class AverageScoreDriver extends Configured implements Tool {
 	 * @since 11/11/2015
 	 * 
 	 */
-	public static class AverageScoreMapper extends
-			Mapper<LongWritable, Text, Text, DoubleWritable> {
+	public static class AverageScoreMapper extends Mapper<LongWritable, Text, Text, DoubleWritable> {
 
 		// instance variables for heap size reduction
 		private Text outKey = new Text();
@@ -119,8 +118,7 @@ public class AverageScoreDriver extends Configured implements Tool {
 		 * @see org.json.JSONException
 		 * 
 		 */
-		public void map(LongWritable key, Text value, Context context)
-				throws IOException, InterruptedException {
+		public void map(LongWritable key, Text value, Context context) throws IOException, InterruptedException {
 
 			// the text that we want to group by
 			String groupBy = context.getConfiguration().get("groupBy");
@@ -132,7 +130,6 @@ public class AverageScoreDriver extends Configured implements Tool {
 					// attempt to parse the line into a JSONObject
 					JSONObject obj = new JSONObject(t);
 					// get the score
-					int score = obj.getInt("score");
 					outValue.set(Double.parseDouble(String.valueOf(obj.getInt("score"))));
 					// if user wants to group by all
 					if (groupBy.equals("*"))
@@ -150,7 +147,7 @@ public class AverageScoreDriver extends Configured implements Tool {
 
 	/**
 	 * AverageScoreReducer is the hadoop class that reduces the output of the
-	 * AverageScoreMapper. It will emit the group along with the average score 
+	 * AverageScoreMapper. It will emit the group along with the average score
 	 * as a DoubleWritable.
 	 * 
 	 * @author Eric Bratt
@@ -158,8 +155,7 @@ public class AverageScoreDriver extends Configured implements Tool {
 	 * @since 11/11/2015
 	 * 
 	 */
-	public static class AverageScoreReducer extends
-			Reducer<Text, DoubleWritable, Text, DoubleWritable> {
+	public static class AverageScoreReducer extends Reducer<Text, DoubleWritable, Text, DoubleWritable> {
 
 		private DoubleWritable outValue = new DoubleWritable();
 
@@ -187,13 +183,16 @@ public class AverageScoreDriver extends Configured implements Tool {
 		 */
 		public void reduce(Text key, Iterable<DoubleWritable> values, Context context)
 				throws IOException, InterruptedException {
-			double numComments = 0;
-			double cumulativeScore = 0;
+			double numComments = 0.0;
+			double cumulativeScore = 0.0;
+			double finalScore = 0.0;
 			while (values.iterator().hasNext()) {
 				cumulativeScore += values.iterator().next().get();
-				numComments += 1;
+				numComments += 1.0;
 			}
-			outValue.set(cumulativeScore / numComments);
+			if (numComments > 0.0 & cumulativeScore != 0.0)
+				finalScore = cumulativeScore / numComments;
+			outValue.set(finalScore);
 			context.write(key, outValue);
 		}
 	}
@@ -222,7 +221,7 @@ public class AverageScoreDriver extends Configured implements Tool {
 		Job job = new Job(getConf());
 		String groupBy = getConf().get("groupBy");
 		StringBuffer sb = new StringBuffer();
-		sb.append("gild percent of: ");
+		sb.append("average score by: ");
 		sb.append(groupBy);
 		job.setJobName(sb.toString());
 
@@ -232,7 +231,7 @@ public class AverageScoreDriver extends Configured implements Tool {
 		FileOutputFormat.setOutputPath(job, out);
 
 		// debugging
-//		job.setNumReduceTasks(0);
+		// job.setNumReduceTasks(0);
 
 		// Mapper and Reducer Classes to use
 		job.setMapperClass(AverageScoreMapper.class);
@@ -291,8 +290,7 @@ public class AverageScoreDriver extends Configured implements Tool {
 	public static void main(String[] args) throws Exception {
 		Configuration conf = new Configuration();
 		if (args.length != 4) {
-			System.err
-					.println("Usage: AverageScore.jar <in> <out> <combiner? yes/no> <group by '*' for all>");
+			System.err.println("Usage: AverageScore.jar <in> <out> <combiner? yes/no> <group by '*' for all>");
 			System.exit(2);
 		}
 		Path out = new Path(args[1]);
