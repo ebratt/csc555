@@ -224,6 +224,9 @@ public class AverageScoreRankerDriver extends Configured implements Tool {
 			job.setCombinerClass(AverageScoreRankerReducer.class);
 		}
 
+		// sort in descending order
+		job.setSortComparatorClass(DoubleWritableDescendingComparator.class);
+
 		// The Jar file to run
 		job.setJarByClass(AverageScoreRankerDriver.class);
 
