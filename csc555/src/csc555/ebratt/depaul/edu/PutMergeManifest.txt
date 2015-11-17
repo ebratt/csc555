@@ -1,4 +1,4 @@
 Manifest-Version: 1.0 
 Main-Class: csc555/ebratt/depaul/edu/PutMerge 
-Class-Path: ~/hadoop/hadoop-1.1.2/*.jar:~/hadoop/hadoop-1.1.2/lib/*.jar 
+Class-Path: ${HADOOP_HOME}/*.jar: ${HADOOP_HOME}/lib/*.jar 
 
