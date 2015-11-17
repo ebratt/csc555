@@ -51,26 +51,30 @@ public class PutMerge {
 	 */
 	public static void main(String[] args) throws IOException {
 
-		if (args.length != 2) {
-			System.err.println("Usage: PutMerge.jar <in> <out>");
+		if (args.length != 3) {
+			System.err.println("Usage: PutMerge.jar <fs.default.name> <in> <out>");
 			System.exit(2);
 		}
 
 		Configuration conf = new Configuration();
+		conf.set("fs.default.name", args[0]);
+
 		FileSystem hdfs = FileSystem.get(conf);
 		FileSystem localFS = FileSystem.getLocal(conf);
 
-		Path localDir = new Path(args[0]);
-		Path hdfsFile = new Path(args[1]);
+		Path localDir = new Path(args[1]);
+		Path hdfsFile = new Path(args[2]);
 
 		try {
 			if (hdfs.exists(hdfsFile)) {
-				System.out.println("deleting target file: " + hdfsFile.toString());
+				System.out.println("deleting target file: "
+						+ hdfsFile.toString());
 				hdfs.delete(hdfsFile, true);
 			}
-			System.out.println(
-					"copying/merging files from: local:/" + localDir.toString() + " to hdfs:/" + hdfsFile.toString());
-			FileUtil.copyMerge(localFS, localDir, hdfs, hdfsFile, false, conf, null);
+			System.out.println("copying/merging files from: local:/"
+					+ localDir.toString() + " to hdfs:/" + hdfsFile.toString());
+			FileUtil.copyMerge(localFS, localDir, hdfs, hdfsFile, false, conf,
+					null);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
