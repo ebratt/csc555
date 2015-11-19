@@ -31,9 +31,6 @@ import org.apache.hadoop.conf.Configured;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.Text;
-import org.apache.hadoop.mapred.ClusterStatus;
-import org.apache.hadoop.mapred.JobClient;
-import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.Reducer;
@@ -204,11 +201,8 @@ public class RCTop10Driver extends Configured implements Tool {
 		FileInputFormat.setInputPaths(job, in);
 		FileOutputFormat.setOutputPath(job, out);
 
-		// testing -- ensure each node gets 2 reducers
-		JobConf jobConf = new JobConf(getConf(), RCTop10Driver.class);
-		JobClient jobClient = new JobClient(jobConf);
-		ClusterStatus cluster = jobClient.getClusterStatus();
-		job.setNumReduceTasks(cluster.getTaskTrackers() * 2);
+		// ensure 1 reduce tasks for ranking
+		job.setNumReduceTasks(1);
 
 		// Mapper and Reducer Classes to use
 		job.setMapperClass(RCTop10Mapper.class);
