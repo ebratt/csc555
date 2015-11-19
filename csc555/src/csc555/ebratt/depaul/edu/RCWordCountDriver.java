@@ -33,6 +33,8 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
+import org.apache.hadoop.mapred.ClusterStatus;
+import org.apache.hadoop.mapred.JobClient;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.Reducer;
@@ -66,8 +68,7 @@ public class RCWordCountDriver extends Configured implements Tool {
 	 * @since 11/11/2015
 	 * 
 	 */
-	public static class RCWordCountMapper extends
-			Mapper<LongWritable, Text, Text, Text> {
+	public static class RCWordCountMapper extends Mapper<LongWritable, Text, Text, Text> {
 
 		// instance variables for heap size reduction
 		private Text outputText = new Text();
@@ -122,8 +123,7 @@ public class RCWordCountDriver extends Configured implements Tool {
 		 * @see org.json.JSONException
 		 * 
 		 */
-		public void map(LongWritable key, Text value, Context context)
-				throws IOException, InterruptedException {
+		public void map(LongWritable key, Text value, Context context) throws IOException, InterruptedException {
 
 			// the text that we want to count
 			String aggregate = context.getConfiguration().get("aggregate");
@@ -137,25 +137,22 @@ public class RCWordCountDriver extends Configured implements Tool {
 					// attempt to parse the line into a JSONObject
 					JSONObject obj = new JSONObject(t);
 					// create an iterator to get the text to count
-					StringTokenizer itr = new StringTokenizer(
-							obj.getString(aggregate));
+					StringTokenizer itr = new StringTokenizer(obj.getString(aggregate));
 					// iterate over all the aggregate text values
 					// there should only be one per line unless it is body
 					while (itr.hasMoreTokens()) {
 						// capture the value, strip-off bad characters, and
 						// force it to lower-case
-						String tmpAggregate = itr.nextToken()
-								.replaceAll("[^\\dA-Za-z ]", "")
-								.replaceAll("\\s+", "+").toLowerCase();
+						String tmpAggregate = itr.nextToken().replaceAll("[^\\dA-Za-z ]", "").replaceAll("\\s+", "+")
+								.toLowerCase();
 						if (!(tmpAggregate.equals(""))) {
 							// if user wants to group by all
 							if (groupBy.equals("*"))
 								outputText.set("ALL" + "_" + tmpAggregate);
 							// otherwise group by the groupBy text
 							else
-								outputText.set(obj.getString(groupBy) + "_"
-										+ tmpAggregate);
-							context.write(outputText, one);							
+								outputText.set(obj.getString(groupBy) + "_" + tmpAggregate);
+							context.write(outputText, one);
 						}
 					}
 				}
@@ -174,8 +171,7 @@ public class RCWordCountDriver extends Configured implements Tool {
 	 * @since 11/11/2015
 	 * 
 	 */
-	public static class RCWordCountReducer extends
-			Reducer<Text, Text, Text, Text> {
+	public static class RCWordCountReducer extends Reducer<Text, Text, Text, Text> {
 
 		// Default constructor for inner-class
 		public RCWordCountReducer() {
@@ -200,8 +196,7 @@ public class RCWordCountDriver extends Configured implements Tool {
 		 *             if something calls interrupt() on the thread.
 		 * 
 		 */
-		public void reduce(Text key, Iterable<Text> values,
-				Context context) throws IOException, InterruptedException {
+		public void reduce(Text key, Iterable<Text> values, Context context) throws IOException, InterruptedException {
 			long sum = 0;
 			while (values.iterator().hasNext()) {
 				sum += Long.parseLong(values.iterator().next().toString());
@@ -246,8 +241,10 @@ public class RCWordCountDriver extends Configured implements Tool {
 		FileInputFormat.setInputPaths(job, in);
 		FileOutputFormat.setOutputPath(job, out);
 
-		// debugging
-		// job.setNumReduceTasks(0);
+		// testing -- ensure each node gets 2 reducers
+		JobClient jobClient = new JobClient();
+		ClusterStatus cluster = jobClient.getClusterStatus();
+		job.setNumReduceTasks(cluster.getTaskTrackers() * 2);
 
 		// Mapper and Reducer Classes to use
 		job.setMapperClass(RCWordCountMapper.class);
@@ -263,7 +260,7 @@ public class RCWordCountDriver extends Configured implements Tool {
 		// Reducer output classes
 		job.setOutputKeyClass(Text.class);
 		job.setOutputValueClass(Text.class);
-		
+
 		// Output format class
 		job.setOutputFormatClass(TextOutputFormat.class);
 
