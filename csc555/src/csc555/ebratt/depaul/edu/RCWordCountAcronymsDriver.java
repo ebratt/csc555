@@ -36,6 +36,9 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
+import org.apache.hadoop.mapred.ClusterStatus;
+import org.apache.hadoop.mapred.JobClient;
+import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.Reducer;
@@ -253,8 +256,11 @@ public class RCWordCountAcronymsDriver extends Configured implements Tool {
 		FileInputFormat.setInputPaths(job, in);
 		FileOutputFormat.setOutputPath(job, out);
 
-		// debugging
-		// job.setNumReduceTasks(0);
+		// testing -- ensure each node gets 2 reducers
+		JobConf jobConf = new JobConf(getConf(), RCWordCountDriver.class);
+		JobClient jobClient = new JobClient(jobConf);
+		ClusterStatus cluster = jobClient.getClusterStatus();
+		job.setNumReduceTasks(cluster.getTaskTrackers() * 2);
 
 		// Mapper and Reducer Classes to use
 		job.setMapperClass(RCWordCountMapper.class);
