@@ -205,7 +205,7 @@ public class RCTop10Driver extends Configured implements Tool {
 		FileOutputFormat.setOutputPath(job, out);
 
 		// testing -- ensure each node gets 2 reducers
-		JobConf jobConf = new JobConf(getConf(), RCWordCountDriver.class);
+		JobConf jobConf = new JobConf(getConf(), RCTop10Driver.class);
 		JobClient jobClient = new JobClient(jobConf);
 		ClusterStatus cluster = jobClient.getClusterStatus();
 		job.setNumReduceTasks(cluster.getTaskTrackers() * 2);
