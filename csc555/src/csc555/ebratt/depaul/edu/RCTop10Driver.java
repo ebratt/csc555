@@ -33,6 +33,7 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapred.ClusterStatus;
 import org.apache.hadoop.mapred.JobClient;
+import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.Reducer;
@@ -204,7 +205,8 @@ public class RCTop10Driver extends Configured implements Tool {
 		FileOutputFormat.setOutputPath(job, out);
 
 		// testing -- ensure each node gets 2 reducers
-		JobClient jobClient = new JobClient();
+		JobConf jobConf = new JobConf(getConf(), RCWordCountDriver.class);
+		JobClient jobClient = new JobClient(jobConf);
 		ClusterStatus cluster = jobClient.getClusterStatus();
 		job.setNumReduceTasks(cluster.getTaskTrackers() * 2);
 
