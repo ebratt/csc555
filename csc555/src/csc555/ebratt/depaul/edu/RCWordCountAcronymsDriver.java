@@ -257,7 +257,7 @@ public class RCWordCountAcronymsDriver extends Configured implements Tool {
 		FileOutputFormat.setOutputPath(job, out);
 
 		// testing -- ensure each node gets 2 reducers
-		JobConf jobConf = new JobConf(getConf(), RCWordCountDriver.class);
+		JobConf jobConf = new JobConf(getConf(), RCWordCountAcronymsDriver.class);
 		JobClient jobClient = new JobClient(jobConf);
 		ClusterStatus cluster = jobClient.getClusterStatus();
 		job.setNumReduceTasks(cluster.getTaskTrackers() * 2);
