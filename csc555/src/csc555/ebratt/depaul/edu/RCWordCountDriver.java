@@ -322,6 +322,10 @@ public class RCWordCountDriver extends Configured implements Tool {
 		// Enable mapper output compression, but not reducer
 		conf.set("mapreduce.map.output.compress", "true");
 		conf.set("mapreduce.output.fileoutputformat.compress", "false");
+		
+		// increase max number of mappers
+		conf.set("mapred.tasktracker.map.tasks.maximum","5");
+		conf.set("mapred.child.java.opts", "-Xmx1024m");
 
 		int res = ToolRunner.run(conf, new RCWordCountDriver(), args);
 		System.exit(res);
