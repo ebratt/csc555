@@ -246,7 +246,7 @@ public class RCWordCountDriver extends Configured implements Tool {
 		JobConf jobConf = new JobConf(getConf(), RCWordCountDriver.class);
 		JobClient jobClient = new JobClient(jobConf);
 		ClusterStatus cluster = jobClient.getClusterStatus();
-		job.setNumReduceTasks(cluster.getTaskTrackers() * 2);
+		job.setNumReduceTasks(cluster.getTaskTrackers() * 5);
 
 		// Mapper and Reducer Classes to use
 		job.setMapperClass(RCWordCountMapper.class);
